@@ -1,6 +1,10 @@
+"""Download a sample of recent NYC 311 service requests."""
+
+from io import StringIO
 from pathlib import Path
 
 import pandas as pd
+import requests
 
 
 API_URL = "https://data.cityofnewyork.us/resource/erm2-nwe9.csv"
@@ -9,7 +13,7 @@ PROJECT_ROOT = Path(__file__).resolve().parents[1]
 OUTPUT_FILE = PROJECT_ROOT / "data" / "raw" / "nyc311_recent.csv"
 
 # Select useful columns and retrieve the most recent 100 requests.
-query = {
+QUERY = {
     "$select": (
         "unique_key,"
         "created_date,"
@@ -28,25 +32,51 @@ query = {
     "$limit": 100,
 }
 
-print("Downloading NYC 311 data...")
 
-df = pd.read_csv(API_URL, params=query)
+def extract_data() -> pd.DataFrame:
+    """Download recent NYC 311 records and save them locally."""
 
-# Convert date columns from text to pandas datetimes.
-df["created_date"] = pd.to_datetime(
-    df["created_date"],
-    errors="coerce"
-)
+    print("Downloading NYC 311 data...")
 
-df["closed_date"] = pd.to_datetime(
-    df["closed_date"],
-    errors="coerce"
-)
+    response = requests.get(
+        API_URL,
+        params=QUERY,
+        timeout=60,
+    )
 
-OUTPUT_FILE.parent.mkdir(parents=True, exist_ok=True)
-df.to_csv(OUTPUT_FILE, index=False)
+    response.raise_for_status()
 
-print(f"Downloaded {len(df):,} rows")
-print(f"Saved to: {OUTPUT_FILE}")
-print()
-print(df.head())
+    df = pd.read_csv(
+        StringIO(response.text)
+    )
+
+    if df.empty:
+        raise ValueError("The NYC 311 API returned no records.")
+
+    for column in ["created_date", "closed_date"]:
+        if column in df.columns:
+            df[column] = pd.to_datetime(
+                df[column],
+                errors="coerce",
+            )
+
+    OUTPUT_FILE.parent.mkdir(
+        parents=True,
+        exist_ok=True,
+    )
+
+    df.to_csv(
+        OUTPUT_FILE,
+        index=False,
+    )
+
+    print(f"Downloaded {len(df):,} rows")
+    print(f"Saved to: {OUTPUT_FILE}")
+    print("\nFirst five rows:")
+    print(df.head())
+
+    return df
+
+
+if __name__ == "__main__":
+    extract_data()
