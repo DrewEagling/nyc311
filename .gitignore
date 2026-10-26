@@ -1,0 +1,28 @@
+.DS_Store
+._*
+__pycache__/
+.ipynb_checkpoints/
+.env
+*.pyc
+
+
+
+# macOS metadata
+.DS_Store
+._*
+
+# Python
+__pycache__/
+*.py[cod]
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Environment and secrets
+.env
+.venv/
+venv/
+
+# Project outputs and local data
+data/*
+outputs/*
