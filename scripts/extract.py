@@ -10,7 +10,7 @@ import requests
 API_URL = "https://data.cityofnewyork.us/resource/erm2-nwe9.csv"
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
-OUTPUT_FILE = PROJECT_ROOT / "data" / "raw" / "nyc311_recent.csv"
+OUTPUT_FILE = PROJECT_ROOT / "data" / "raw" / "nyc311_sample.csv"
 
 # Select useful columns and retrieve the most recent 100 requests.
 QUERY = {
@@ -29,7 +29,7 @@ QUERY = {
         "longitude"
     ),
     "$order": "created_date DESC",
-    "$limit": 100,
+    "$limit": 1000,
 }
 
 
