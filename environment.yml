@@ -1,0 +1,6 @@
+name: nyc311
+channels:
+  - defaults
+dependencies:
+  - python=3.11
+prefix: /Users/ae/anaconda3/envs/nyc311
