@@ -1,28 +1,29 @@
-.DS_Store
-._*
-__pycache__/
-.ipynb_checkpoints/
-.env
-*.pyc
-
-
-
 # macOS metadata
 .DS_Store
 ._*
 
-# Python
+# Python-generated files
 __pycache__/
 *.py[cod]
 
-# Jupyter
+# Jupyter-generated files
 .ipynb_checkpoints/
 
-# Environment and secrets
+# Virtual environments and secrets
 .env
 .venv/
 venv/
 
-# Project outputs and local data
-data/*
+# Downloaded and processed datasets
+data/raw/*
+data/processed/*
+
+# Generated outputs
 outputs/*
+
+# Keep the folder structure in Git
+!data/raw/.gitkeep
+!data/processed/.gitkeep
+!outputs/.gitkeep
+
+
