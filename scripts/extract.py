@@ -6,13 +6,12 @@ from pathlib import Path
 import pandas as pd
 import requests
 
-
 API_URL = "https://data.cityofnewyork.us/resource/erm2-nwe9.csv"
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 OUTPUT_FILE = PROJECT_ROOT / "data" / "raw" / "nyc311_sample.csv"
 
-# Select useful columns and retrieve the most recent 100 requests.
+# Select useful columns and retrieve the most recent requests.
 QUERY = {
     "$select": (
         "unique_key,"
@@ -29,7 +28,7 @@ QUERY = {
         "longitude"
     ),
     "$order": "created_date DESC",
-    "$limit": 1000,
+    "$limit": 10000,
 }
 
 
@@ -60,6 +59,14 @@ def extract_data() -> pd.DataFrame:
                 errors="coerce",
             )
 
+    # Resolution time in hours (NaN for open requests)
+    df["resolution_hours"] = (
+        df["closed_date"] - df["created_date"]
+    ).dt.total_seconds() / 3600
+
+    # Closed/Open flag
+    df["is_closed"] = df["closed_date"].notna()
+
     OUTPUT_FILE.parent.mkdir(
         parents=True,
         exist_ok=True,
@@ -72,6 +79,13 @@ def extract_data() -> pd.DataFrame:
 
     print(f"Downloaded {len(df):,} rows")
     print(f"Saved to: {OUTPUT_FILE}")
+
+    print("\nResolution summary (hours):")
+    print(df["resolution_hours"].describe())
+
+    print("\nClosed requests:")
+    print(df["is_closed"].value_counts())
+
     print("\nFirst five rows:")
     print(df.head())
 
